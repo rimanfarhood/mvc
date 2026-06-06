@@ -5,6 +5,7 @@ using MvcApp.Data;
 using System.Collections.Generic;
 using MvcApp.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MvcApp.Controllers
 {
@@ -22,19 +23,20 @@ namespace MvcApp.Controllers
         [HttpGet("index")]
         public async Task<IActionResult> Index()
         {
-            var item = await _context.Items.ToListAsync();
+            var item = await _context.Items.Include(s => s.SerialNumber).Include(c => c.Category).ToListAsync();
             return View(item);
         }
 
         [HttpGet("create")]
         public IActionResult Create()
         {
+            ViewData["Categories"] = new SelectList(_context.Categories, "Id", "Name");
             return View();
         }
 
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create([Bind("Id, Name, Price")] Item item)
+        public async Task<IActionResult> Create([Bind("Id, Name, Price, Category")] Item item)
         {
             if (ModelState.IsValid)
             {
@@ -48,12 +50,13 @@ namespace MvcApp.Controllers
         [HttpGet("edit")]
         public async Task<IActionResult> Edit(int id)
         {
+            ViewData["Categories"] = new SelectList(_context.Categories, "Id", "Name");
             var item = await _context.Items.FirstOrDefaultAsync(x => x.Id == id);
             return View(item);
         }
 
         [HttpPost("edit")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id, Name, Price")] Item item)
+        public async Task<IActionResult> Edit(int id, [Bind("Id, Name, Price, CategoryId")] Item item)
         {
             if (ModelState.IsValid)
             {
@@ -82,17 +85,7 @@ namespace MvcApp.Controllers
             return RedirectToAction("Index");
         }
 
-        // [HttpPost()][HttpDelete("delete")]
-        // public async Task<IActionResult> DeleteConfirm(int id)
-        // {
-        //     var item = await _context.Items.FindAsync(id);
-        //     if(item != null)
-        //     {
-        //         _context.Items.Remove(item);
-        //         await _context.SaveChangesAsync();
-        //     }
-        //     return View("Index");
-        // }
+
 
 
     }
