@@ -23,7 +23,11 @@ namespace MvcApp.Controllers
         [HttpGet("index")]
         public async Task<IActionResult> Index()
         {
-            var item = await _context.Items.Include(s => s.SerialNumber).Include(c => c.Category).ToListAsync();
+            var item = await _context.Items.Include(s => s.SerialNumber)
+                                           .Include(c => c.Category)
+                                           .Include(ic => ic.ItemClients)
+                                           .ThenInclude(c => c.Client)
+                                           .ToListAsync();
             return View(item);
         }
 
